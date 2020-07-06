@@ -102,6 +102,18 @@ public class FirebasePluginMessagingService extends FirebaseMessagingService {
 
             Map<String, String> data = remoteMessage.getData();
 
+            if(data.containsKey("handler_class")) {
+                try {
+                    Class cls = Class.forName(data.get("handler_class"));
+                    FirebasePluginHandlerInterface obj = (FirebasePluginHandlerInterface) cls.newInstance();
+                    obj.onMessageReceived(remoteMessage, this);
+                    Log.d(TAG, "Handle by class: " + data.get("handler_class"));
+                    return;
+                } catch(ClassNotFoundException erro) {
+                    Log.d(TAG, "Try handler class but not found: " + data.get("handler_class"));
+                }
+            }
+
             if (remoteMessage.getNotification() != null) {
                 // Notification message payload
                 Log.i(TAG, "Received message: notification");
